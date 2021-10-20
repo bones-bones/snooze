@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+
+        <title>Skeleton Club - Projection</title>
+    </head>
+
+    <body>
+        click the video to launch
+        <!--todo, fix this shit-->
+        <script>
+            window.onload = () => {
+                const v = document.createElement('video');
+                document.body.append(v);
+                const dlButton = document.createElement('button');
+                dlButton.innerText = 'done';
+                document.body.append(dlButton);
+
+                v.style.minHeight = '400px';
+                v.style.minWidth = '400px';
+                v.style.border = '2px solid black';
+                v.controls = 'controls';
+                const createGuest = async (offerDesc) => {
+                    return new Promise((resolve) => {
+                        console.log('creating the guest');
+                        console.log(offerDesc);
+
+                        const peerConn = new webkitRTCPeerConnection({
+                            iceServers: [
+                                { urls: ['stun:stun.l.google.com:19302'] },
+                            ],
+                        });
+                        console.log(peerConn);
+
+                        peerConn.ondatachannel = (event) => {
+                            event.channel.onopen = () => {
+                                event.channel.onmessage = async (ent) => {
+                                    const parsedMessage =
+                                        typeof ent.data === 'string' &&
+                                        ent.data.startsWith('{')
+                                            ? JSON.parse(ent.data)
+                                            : ent.data;
+                                    const {
+                                        description,
+                                        candidate,
+                                    } = parsedMessage;
+                                    if (description) {
+                                        await peerConn.setRemoteDescription(
+                                            description
+                                        );
+                                        if (description.type === 'offer') {
+                                            await peerConn.setLocalDescription(
+                                                await peerConn.createAnswer({
+                                                    offerToReceiveVideo: true,
+                                                })
+                                            );
+                                            event.channel.send(
+                                                JSON.stringify({
+                                                    description:
+                                                        peerConn.localDescription,
+                                                })
+                                            );
+                                        }
+                                    } else if (candidate) {
+                                        await peerConn.addIceCandidate(
+                                            candidate
+                                        );
+                                    }
+                                };
+                            };
+                        };
+                        peerConn.onicecandidate = (e) => {
+                            if (e.candidate === null) {
+                                const bc = new BroadcastChannel(
+                                    'projectionChannel'
+                                );
+
+                                bc.postMessage(
+                                    JSON.stringify(peerConn.localDescription)
+                                ); /* send */
+                                bc.onmessage = function (ev) {
+                                    console.log(ev);
+                                }; /* receive */
+                            }
+                        };
+
+                        peerConn.setRemoteDescription(
+                            new RTCSessionDescription(offerDesc)
+                        );
+
+                        peerConn
+                            .createAnswer({ offerToReceiveVideo: true })
+                            .then((desc) => {
+                                peerConn.setLocalDescription(desc).then(() => {
+                                    resolve(peerConn);
+                                });
+                            });
+                    });
+                };
+                v.onclick = () => {
+                    createGuest(
+                        JSON.parse(decodeURIComponent(location.search.slice(1)))
+                    ).then((connection) => {
+                        connection.ontrack = ({ streams, track }) => {
+                            v.srcObject = streams[0];
+
+                            let chunks = [];
+                            const testmr = new MediaRecorder(streams[0], {
+                                mimeType: 'video/webm',
+                            });
+
+                            dlButton.onclick = () => {
+                                testmr.stop();
+                            };
+
+                            testmr.ondataavailable = function (e) {
+                                chunks.push(e.data);
+                            };
+                            testmr.start();
+                            testmr.onstop = (e) => {
+                                console.log('stopping');
+                                const testing = new Blob(chunks, {
+                                    type: 'video/webm',
+                                });
+                                let downloadr = document.createElement('a');
+                                downloadr.download = 'test.webm';
+                                downloadr.href = URL.createObjectURL(testing);
+                                downloadr.click();
+                            };
+
+                            v.play();
+                            // v.onclick = () => {
+
+                            //   document.body.requestFullscreen();
+
+                            // }
+                        };
+                    });
+                    //
+                };
+            };
+        </script>
+    </body>
+</html>

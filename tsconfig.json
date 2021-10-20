@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "target": "ES2016",
+        "lib": ["dom", "dom.iterable", "esnext"],
+        "allowJs": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
+        "module": "esnext",
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "resolveJsonModule": true,
+        "isolatedModules": false,
+        "noEmit": false,
+        "jsx": "react",
+        "outDir": "./dist/"
+    },
+    "exclude": ["node_modules"],
+    "include": ["./src", "./server"]
+}

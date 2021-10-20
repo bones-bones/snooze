@@ -1,0 +1,11 @@
+<svg 
+ xmlns="http://www.w3.org/2000/svg"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+    <filter id="element-id">
+    <feMorphology id="morph" operator="dilate" radius="10" >
+            <animate attributeName="r" values="0;40" dur="3s" repeatCount="indefinite" />
+        </feMorphology>
+    </filter>
+  </defs>
+</svg>
