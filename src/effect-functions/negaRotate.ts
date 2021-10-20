@@ -1,5 +1,5 @@
 import { GenericGeneratorParms } from './EffectTypes';
-import negaEffect from './nega';
+import { negaEffect } from './nega';
 import { rotate } from './rotate';
 
 export function* negaRotate(

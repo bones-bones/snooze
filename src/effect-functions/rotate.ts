@@ -1,4 +1,4 @@
-import { GenericParms } from './EffectTypes';
+import { GenericParms } from './types';
 
 export function rotate({ array, width }: GenericParms, degree: number) {
     const height = array.length / 4 / width;

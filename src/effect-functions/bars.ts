@@ -1,4 +1,4 @@
-import { GenericParms } from './EffectTypes';
+import { GenericParms } from './types';
 
 const barWidth = 5;
 export const bars = ({ array, width, dataArray }: GenericParms) => {
@@ -20,7 +20,7 @@ export const bars = ({ array, width, dataArray }: GenericParms) => {
                 verticalOffset = Math.floor(
                     Math.sqrt(
                         dataArray![
-                            dataArray!.length - Math.floor((i / width) * 12)
+                        dataArray!.length - Math.floor((i / width) * 12)
                         ]
                     )
                 );

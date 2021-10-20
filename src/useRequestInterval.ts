@@ -11,11 +11,11 @@ export const useRequestInterval = (callback: TimerHandler, delay: Delay) => {
     }, [callback]);
 
     useEffect(() => {
-        const handler = (...args: any[]) => savedCallbackRef.current!(...args);
+        const handler = (...args: any[]) => { savedCallbackRef.current!(...args) };
 
         if (delay !== null) {
             const intervalId = requestInterval(handler, delay);
-            return () => clearRequestInterval(intervalId.value!);
+            return () => { clearRequestInterval(intervalId.value!) };
         }
     }, [delay]);
 };

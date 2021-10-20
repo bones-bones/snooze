@@ -1,5 +1,5 @@
 import { getLuminosity } from './helperFunctions/colorFunctions';
-import { GenericParms } from './EffectTypes';
+import { GenericParms } from './types';
 
 export function pulseWithSound({ array, dataArray }: GenericParms) {
     for (let i = 0; i < array.length; i += 4) {

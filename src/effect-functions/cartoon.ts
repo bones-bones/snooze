@@ -1,64 +1,18 @@
-import { VIDEO_WIDTH } from '../constants';
-import { GenericParms } from './EffectTypes';
-import { getColorDistance } from './helperFunctions/colorDistance';
+import { GenericParms } from './types';
+import { instantiateStreaming } from '@assemblyscript/loader';
+import type * as MyModule from "../../assembly/generatedTypes/MyModule"; // pointing at the generated d.ts
 
-// const tArray = new Array(VIDEO_WIDTH * 4);
+export const loadWasmCartoon = async (): Promise<({ array: inputArray }: GenericParms,
+    threshold: number) => Uint8ClampedArray> => {
 
-export function cartoon(
-    { array: inputArray }: GenericParms,
-    threshold: number = 9500
-) {
-    const newWidth = VIDEO_WIDTH * 4;
+    const { cartoon: wasmCartoon, __getUint8ClampedArray, __newArray, Uint8ClampedArray_ID } = (await instantiateStreaming<typeof MyModule>(fetch('./assembly/myModule.release.wasm'), {})).exports
 
-    for (let i = 0; i < inputArray.length - newWidth; i += 4) {
-        if (i % newWidth !== newWidth - 4) {
-            const colorDistance = getColorDistance(
-                inputArray[i],
-                inputArray[i + 1],
-                inputArray[i + 2],
-                inputArray[i + newWidth],
-                inputArray[i + newWidth + 1],
-                inputArray[i + newWidth + 2]
-            );
+    return function cartoon({ array: inputArray }: GenericParms,
+        threshold: number = 9500) {
 
-            const colorDistance2 = getColorDistance(
-                inputArray[i + newWidth],
-                inputArray[i + newWidth + 1],
-                inputArray[i + newWidth + 2],
-                inputArray[i + newWidth * 2],
-                inputArray[i + newWidth * 2 + 1],
-                inputArray[i + newWidth * 2 + 2]
-            );
+        const arrPtrL = __newArray(Uint8ClampedArray_ID, inputArray)
 
-            if (colorDistance <= threshold && colorDistance2) {
-                inputArray[i + newWidth] = inputArray[i];
-                inputArray[i + newWidth + 1] = inputArray[i + 1];
-                inputArray[i + newWidth + 2] = inputArray[i + 2];
-            }
-        }
-
-        if (i % newWidth !== 0 && i % newWidth !== 1) {
-            const secondColorDistance = getColorDistance(
-                inputArray[i],
-                inputArray[i + 1],
-                inputArray[i + 2],
-                inputArray[i + 4],
-                inputArray[i + 5],
-                inputArray[i + 6]
-            );
-            const secondColorDistance2 = getColorDistance(
-                inputArray[i + 4],
-                inputArray[i + 5],
-                inputArray[i + 6],
-                inputArray[i + 8],
-                inputArray[i + 9],
-                inputArray[i + 10]
-            );
-            if (secondColorDistance <= threshold && secondColorDistance2) {
-                inputArray[i + 4] = inputArray[i];
-                inputArray[i + 5] = inputArray[i + 1];
-                inputArray[i + 6] = inputArray[i + 2];
-            }
-        }
+        const resp = __getUint8ClampedArray(wasmCartoon(arrPtrL, threshold))
+        return resp as Uint8ClampedArray;
     }
 }

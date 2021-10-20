@@ -1,4 +1,4 @@
-import { GenericParms } from './EffectTypes';
+import { GenericParms } from './types';
 
 export function brightStar(
     { array, width, dataArray: dats }: GenericParms,

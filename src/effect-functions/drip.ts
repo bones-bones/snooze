@@ -1,4 +1,4 @@
-import { GenericParms } from './EffectTypes';
+import { GenericParms } from './types';
 
 export function drip({ array, width }: GenericParms, dripThreshold: number) {
     const THRESHOLD = dripThreshold;

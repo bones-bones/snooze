@@ -1,6 +1,6 @@
-import { subtract } from './subtract';
-import { averageOfTheTwo } from './merge';
-import { overlay } from './str8Overlay';
+import { subtract, loadSubtract } from './subtract';
+import { averageOfTheTwo, wasmAverageOfTheTwo } from './merge';
+import { loadWasmOverlay, overlay } from './str8Overlay';
 import { fadeOverlay } from './fadeOverlay';
 
 export interface MixEffect {
@@ -13,10 +13,22 @@ export interface MixEffect {
 export enum MixTypes {
     Str8tOverlay = 'Str8tOverlay',
     Merge = 'Merge',
-
     Subtract = 'Subtract',
     // Slide = 'Slide',
     FadeOverlay = 'FadeOverlay',
+}
+
+export const asyncMixLoader = async (): Promise<{
+    [key in MixTypes]: MixTypeProperty;
+}> => {
+    return {
+        [MixTypes.Merge]: {
+            func: (await wasmAverageOfTheTwo()),
+        },
+        [MixTypes.Subtract]: { func: await loadSubtract() },
+        [MixTypes.Str8tOverlay]: { func: await loadWasmOverlay() },
+        [MixTypes.FadeOverlay]: { func: fadeOverlay },
+    }
 }
 
 export const MixTypeProperties: {
@@ -36,14 +48,14 @@ interface MixTypeProperty {
         leftArray: Uint8ClampedArray,
         rightArray: Uint8ClampedArray,
         width: number,
-        degree?: number,
+        degree: number,
         ...args: any[]
     ) => Uint8ClampedArray;
     generatorFunction?: (
         leftArray: Uint8ClampedArray,
         rightArray: Uint8ClampedArray,
         width: number,
-        dagree?: number,
+        dagree: number,
         ...args: any[]
     ) => Generator<any, any, number[]>;
     parms?: { type: 'text' | 'enum'; label: string; values?: string[] }[];

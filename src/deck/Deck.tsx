@@ -20,6 +20,7 @@ import { LoopControls } from '../loopControls';
 import { DeckMediaSource } from '../deck-media-source/DeckMediaSource';
 import { DeckEffects } from '../deck-effects';
 // import { generate as generateGeoPattern } from 'geopattern';
+let theArray;
 
 export const Deck = ({ canvasRef, deckId }: DeckProps) => {
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -29,10 +30,10 @@ export const Deck = ({ canvasRef, deckId }: DeckProps) => {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        let theArray;
-        canvasCtx = (canvasRef.current as any)?.getContext('2d', {
+        canvasCtx = (canvasRef.current)?.getContext('2d', {
             willReadFrequently: true,
-        })!;
+        })! as CanvasRenderingContext2D;
+        //canvasCtx!.imageSmoothingEnabled = false;
         requestInterval(() => {
             const {
                 source: { sourceMediaType },
@@ -47,7 +48,6 @@ export const Deck = ({ canvasRef, deckId }: DeckProps) => {
 
             // huge performance issue, maybe
             canvasCtx.clearRect(0, 0, srcCurrent!.width, srcCurrent!.height);
-
             // perf issue end
             // const filterArray = [
             //     { turbulence: { frequency: 0.05, numOctaves: 2 } },
@@ -68,35 +68,36 @@ export const Deck = ({ canvasRef, deckId }: DeckProps) => {
             theArray = canvasCtx.getImageData(
                 0,
                 0,
-                canvasRef.current!.width,
-                canvasRef.current!.height
-            );
-            const theArrayData = theArray.data;
+                VIDEO_WIDTH, VIDEO_HEIGHT
+            ).data;
+
             const dataArray = getSongDataArray();
 
 
 
-            // Future elliot, at some point you should pass in the getSongDataArray to the generator function
+            // Future person, at some point you should pass in the getSongDataArray to the generator function
             for (let i = 0; i < effects.length; i++) {
                 if (effects[i].active) {
                     if (effects[i].composedFunctionHolder) {
-                        effects[i].composedFunctionHolder!(
+                        theArray = effects[i].composedFunctionHolder!(
                             {
-                                array: theArrayData,
+                                array: theArray,
                                 width: VIDEO_WIDTH,
                                 dataArray,
                             },
                             ...(effects[i].parms
                                 ? Object.values(effects[i].parms)
                                 : [])
-                        );
+                        ) as any;
                     } else if (effects[i].generatorFunctionHolder) {
-                        effects[i].generatorFunctionHolder!.next(theArrayData);
+                        theArray = (effects[i].generatorFunctionHolder!.next(theArray) as any).value;
+
                         //This code steers as a generator setTimeout(() => { entry.generatorFunctionHolder!.next({ newValue: 2 }) }, 2000);
                     }
                 }
             }
-            canvasCtx.putImageData(theArray, 0, 0);
+            canvasCtx.putImageData(new ImageData(theArray, VIDEO_WIDTH, VIDEO_HEIGHT), 0, 0);
+            theArray = []
         }, FPS_RATE);
     }, []);
     return (

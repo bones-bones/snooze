@@ -1,0 +1,23 @@
+{
+    "entries": [
+        "./index.ts"
+    ],
+    "include": [
+        "."
+    ],
+    "options": {
+        "importTable": false,
+        "exportRuntime": true,
+        "tsdFile": "../generatedTypes/MyModule.d.ts"
+    },
+    "targets": {
+        "release": {
+            "optimize": true,
+            "binaryFile": "../../dist/public/assembly/myModule.release.wasm"
+        },
+        "debug": {
+            "debug": true,
+            "binaryFile": "../../dist/public/assembly/myModule.debug.wasm"
+        }
+    }
+}

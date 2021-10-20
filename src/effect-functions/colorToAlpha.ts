@@ -1,4 +1,4 @@
-import { GenericParms } from './EffectTypes';
+import { GenericParms } from './types';
 
 export function colorToAlpha(
     { array }: GenericParms,
@@ -34,8 +34,8 @@ export function colorToAlpha(
         } else {
             const brighness = Math.sqrt(
                 array[y] * array[y] +
-                    array[y + 1] * array[y + 1] +
-                    array[y + 2] * array[y + 2]
+                array[y + 1] * array[y + 1] +
+                array[y + 2] * array[y + 2]
             );
             if (indexOne == 0 && brighness > 400) {
                 array[y + 3] = 0;

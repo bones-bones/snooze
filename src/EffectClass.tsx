@@ -1,4 +1,5 @@
-import { EffectTypes, GenericParms } from './effect-functions/EffectTypes';
+import { EffectTypes } from './effect-functions/EffectTypes';
+import { GenericParms } from './effect-functions/types';
 // import { InputSource } from './InputSource';
 
 export default interface Effect {

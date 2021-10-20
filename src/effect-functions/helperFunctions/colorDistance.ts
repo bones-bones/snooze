@@ -2,6 +2,10 @@
 /**
  * Returns a value 0 - 195075
  */
+
+
+
+
 export function getColorDistance(
     r: number,
     g: number,

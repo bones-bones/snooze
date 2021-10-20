@@ -1,4 +1,4 @@
-import { GenericParms } from './EffectTypes';
+import { GenericParms } from './types';
 
 export function pixelateEffect(
     { array, width }: GenericParms,
@@ -21,7 +21,7 @@ export function pixelateEffect(
             const a = array[baseLoc + 3];
             for (let k = 0; k < newDegree && k + x * newDegree < width; k++) {
                 for (let l = 0; l < newDegree; l++) {
-                    // Hey future elliot, there is absolutely a bug here where it writes to more in the array. Sorry
+                    // Hey future person, there is absolutely a bug here where it writes to more in the array. Sorry
                     const pixelLoc = baseLoc + (k + l * width) * 4;
                     array[pixelLoc] = r;
                     array[pixelLoc + 1] = g;
