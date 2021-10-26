@@ -25,8 +25,8 @@ export const asyncMixLoader = async (): Promise<{
         [MixTypes.Merge]: {
             func: (await wasmAverageOfTheTwo()),
         },
-        [MixTypes.Subtract]: { func: await loadSubtract() },
-        [MixTypes.Str8tOverlay]: { func: await loadWasmOverlay() },
+        [MixTypes.Subtract]: { func: subtract },
+        [MixTypes.Str8tOverlay]: { func: overlay },
         [MixTypes.FadeOverlay]: { func: fadeOverlay },
     }
 }

@@ -1,12 +1,37 @@
-export const Uint8ClampedArray_ID = idof<Uint8ClampedArray>();
+
+declare function readLeft(): Uint8Array;
+declare function readRight(): Uint8Array;
+declare function write(array: Uint8Array): void;
+
+
+
+export const Uint8ClampedArray_ID = idof<Uint8Array>();
+
+
+export function draw(degree: number, effect: u32): void {
+    switch (effect) {
+        case 0: {
+            write(overlay(readLeft(), readRight(), 0, degree));
+            return
+        }
+        case 1: {
+            write(mergeAverage(readLeft(), readRight(), 0, degree));
+            return
+        }
+        case 2: {
+            write(subtract(readLeft(), readRight(), 0, degree));
+            return
+        }
+    }
+}
 
 
 export function overlay(
-    leftArray: Uint8ClampedArray,
-    rightArray: Uint8ClampedArray,
+    leftArray: Uint8Array,
+    rightArray: Uint8Array,
     _width: number,
     degree: number = 50
-): Uint8ClampedArray {
+): Uint8Array {
     const rFactor = degree / 100;
     const lFactor = (100 - degree) / 100;
     let finRed = 0;
@@ -58,14 +83,15 @@ export function overlay(
 
 
 export function mergeAverage(
-    leftArray: Uint8ClampedArray,
-    rightArray: Uint8ClampedArray,
+    leftArray: Uint8Array,
+    rightArray: Uint8Array,
     _width: u32,
-    degree: f32 = 50
-): Uint8ClampedArray {
-    const rFactor: f32 = degree / 100;
-    const lFactor: f32 = 1 - rFactor
+    degree: number = 50
+): Uint8Array {
 
+    const rFactor: f32 = <f32>degree / 100;
+    const lFactor: f32 = 1 - rFactor
+    //console.test();
     let i = leftArray.length;
 
     while (i--) {

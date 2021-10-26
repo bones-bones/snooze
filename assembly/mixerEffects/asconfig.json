@@ -1,13 +1,14 @@
 {
     "entries": [
-        "./mixerEffects.ts"
+        "./index.ts"
     ],
     "include": [
         "."
     ],
     "options": {
-        "importTable": false,
+        "importTable": true,
         "exportRuntime": true,
+        "importRuntime": true,
         "tsdFile": "../generatedTypes/MixerEffects.d.ts"
     },
     "targets": {
