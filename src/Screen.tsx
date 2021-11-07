@@ -67,7 +67,7 @@ export const Screen = (props: ScreenProps) => {
                             canvasCtx!.putImageData(new ImageData(__getUint8ClampedArray(response), VIDEO_WIDTH, VIDEO_HEIGHT), 0, 0);
                         }
                     }
-                } as any                                              // Not doing anthing fancy... yet
+                } as any 
             )).exports;
 
         mergeEffect.current = draw
