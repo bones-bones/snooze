@@ -12,13 +12,13 @@ export function draw(degree: u32, effect: u32): void {
         }
         case 1: {
             write(mergeAverage(readLeft(), readRight(), degree));
-            //  write(readRight());
             return;
         }
         case 2: {
             write(subtract(readLeft(), readRight(), degree));
             return;
         }
+        default:
         case 3: {
             write(fadeOverlay(readLeft(), readRight(), degree));
             return;
@@ -151,39 +151,50 @@ function fadeOverlay(
     const lFactor: f32 = 1 - rFactor;
     let i = leftArray.length;
 
-    let finRed = 0.0;
-    let finBlue = 0.0;
-    let finGreen = 0.0;
-
     while ((i -= 4)) {
         if (lFactor >= rFactor) {
             const lAlphaFactor = unchecked(leftArray[i + 3]) / 255;
             const inverseAlphaFactor = (1.0 - lAlphaFactor) * rFactor;
-            finRed =
-                unchecked(leftArray[i]) * lAlphaFactor +
-                unchecked(rightArray[i]) * inverseAlphaFactor;
-            finGreen =
-                unchecked(leftArray[i + 1]) * lAlphaFactor +
-                unchecked(rightArray[i + 1]) * inverseAlphaFactor;
-            finBlue =
-                unchecked(leftArray[i + 2]) * lAlphaFactor +
-                unchecked(rightArray[i + 2]) * inverseAlphaFactor;
+            unchecked(
+                (leftArray[i] = <u32>(
+                    (unchecked(leftArray[i]) * lAlphaFactor +
+                        unchecked(rightArray[i]) * inverseAlphaFactor)
+                ))
+            );
+            unchecked(
+                (leftArray[i + 1] = <u32>(
+                    (unchecked(leftArray[i + 1]) * lAlphaFactor +
+                        unchecked(rightArray[i + 1]) * inverseAlphaFactor)
+                ))
+            );
+            unchecked(
+                (leftArray[i + 2] = <u32>(
+                    (unchecked(leftArray[i + 2]) * lAlphaFactor +
+                        unchecked(rightArray[i + 2]) * inverseAlphaFactor)
+                ))
+            );
         } else {
             const rAlphaFactor = unchecked(rightArray[i + 3]) / 255;
             const inverseAlphaFactor = (1.0 - rAlphaFactor) * lFactor;
-            finRed =
-                unchecked(rightArray[i]) * rAlphaFactor +
-                unchecked(leftArray[i]) * inverseAlphaFactor;
-            finGreen =
-                unchecked(rightArray[i + 1]) * rAlphaFactor +
-                unchecked(leftArray[i + 1]) * inverseAlphaFactor;
-            finBlue =
-                unchecked(rightArray[i + 2]) * rAlphaFactor +
-                unchecked(leftArray[i + 2]) * inverseAlphaFactor;
+            unchecked(
+                (leftArray[i] = <u32>(
+                    (unchecked(rightArray[i]) * rAlphaFactor +
+                        unchecked(leftArray[i]) * inverseAlphaFactor)
+                ))
+            );
+            unchecked(
+                (leftArray[i + 1] = <u32>(
+                    (unchecked(rightArray[i + 1]) * rAlphaFactor +
+                        unchecked(leftArray[i + 1]) * inverseAlphaFactor)
+                ))
+            );
+            unchecked(
+                (leftArray[i + 2] = <u32>(
+                    (unchecked(rightArray[i + 2]) * rAlphaFactor +
+                        unchecked(leftArray[i + 2]) * inverseAlphaFactor)
+                ))
+            );
         }
-        unchecked((leftArray[i] = <u32>finRed));
-        unchecked((leftArray[i + 1] = <u32>finGreen));
-        unchecked((leftArray[i + 2] = <u32>finBlue));
         unchecked((leftArray[i + 3] = 255));
     }
 
