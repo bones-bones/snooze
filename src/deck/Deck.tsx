@@ -65,7 +65,9 @@ export const Deck = ({ canvasRef, deckId }: DeckProps) => {
                 srcCurrent!.height
             );
 
-            theArray = canvasCtx.getImageData(
+
+            requestAnimationFrame(()=>{
+            theArray = canvasCtx!.getImageData(
                 0,
                 0,
                 VIDEO_WIDTH, VIDEO_HEIGHT
@@ -96,8 +98,9 @@ export const Deck = ({ canvasRef, deckId }: DeckProps) => {
                     }
                 }
             }
-            canvasCtx.putImageData(new ImageData(theArray, VIDEO_WIDTH, VIDEO_HEIGHT), 0, 0);
-            theArray = []
+            canvasCtx!.putImageData(new ImageData(theArray, VIDEO_WIDTH, VIDEO_HEIGHT), 0, 0);
+            theArray = [];
+        });
         }, FPS_RATE);
     }, []);
     return (
