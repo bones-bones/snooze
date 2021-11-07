@@ -7,7 +7,6 @@ import {
 import { DeckState, Source } from '../deck';
 import { MixEffect, MixTypes } from '../mixer/MixerEffects';
 
-import lighthouse from '../webms/lighthouse.webm';
 import cubes from '../webms/cubes.webm';
 import Effect from '../EffectClass';
 import { EffectTypes } from '../effect-functions/EffectTypes';

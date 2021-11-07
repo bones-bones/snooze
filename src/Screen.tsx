@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import styled from '@emotion/styled';
-import { asyncMixLoader } from './mixer/MixerEffects';
+import { asyncMixLoader, MixTypes } from './mixer/MixerEffects';
 import { beginProjection } from './projectionWindow';
 import { FPS, FPS_RATE, VIDEO_HEIGHT, VIDEO_WIDTH } from './constants';
 import { store } from './store';
@@ -95,41 +95,8 @@ export const Screen = (props: ScreenProps) => {
                 slider,
             } = store.getState().screenState;
 
-            mergeEffect?.current?.(slider, 1)
 
-
-            // if (mixEffects.current?.[type].func) {
-            //     // let dataHolder = lCanvasCtx!.getImageData(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT)
-            //     //     .data;
-            //     // const dlLength = dataHolder.length;
-
-            //     // for (let i = 0; i < dlLength; i++) {
-            //     //     i8[i] = dataHolder[i];
-            //     // }
-            //     // dataHolder = rCanvasCtx!.getImageData(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT)
-            //     //     .data;
-            //     // const targetLength = dlLength * 2;
-
-            //     // for (let i = dlLength; i < targetLength; i++) {
-            //     //     i8[i] = dataHolder[i - dlLength];
-            //     // }
-
-            //     // mutateFunctionRef.current?.()
-            //     const leftImage = lCanvasCtx!.getImageData(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT).data
-
-            //     const response = mixEffects.current?.[type].func!(
-            //         leftImage,
-            //         rCanvasCtx!.getImageData(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT)
-            //             .data,
-            //         VIDEO_WIDTH,
-            //         slider
-            //     );
-            //     // for (let i = 0; i < dataHolder.length; i++) {
-            //     //     dataHolder[i] = i8[i];
-            //     // }
-            //     canvasCtx!.putImageData(new ImageData(response, VIDEO_WIDTH, VIDEO_HEIGHT), 0, 0);
-            // }
-
+            mergeEffect?.current?.(slider, Object.keys(MixTypes).indexOf(type))
         }
     }, FPS_RATE);
 
