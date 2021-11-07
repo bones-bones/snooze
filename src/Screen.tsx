@@ -10,6 +10,8 @@ import { Slider } from './Slider';
 import { EffectSelector } from './EffectSelector';
 
 
+import type * as MixerEffects from "../assembly/generatedTypes/MixerEffects"; // pointing at the generated d.ts
+import { instantiateStreaming } from '@assemblyscript/loader';
 
 // const memory = new WebAssembly.Memory({
 //     initial: 24,
@@ -27,7 +29,8 @@ interface ScreenProps {
     audioRef: React.RefObject<HTMLAudioElement>;
 }
 export const Screen = (props: ScreenProps) => {
-    const mixEffects = useRef<any | null>(null)
+    const mixEffects = useRef<any | null>(null);
+    const mergeEffect = useRef<any | null>(null);
     asyncMixLoader().then(a => { mixEffects.current = a })
     const canvasRef = useRef<HTMLCanvasElement>(null);
     let lCanvasCtx: CanvasRenderingContext2D | undefined;
@@ -35,7 +38,7 @@ export const Screen = (props: ScreenProps) => {
 
     let canvasCtx: CanvasRenderingContext2D | undefined;
 
-    const initializedScreensAndModules = () => {
+    const initializedScreensAndModules = async () => {
         const canvasContextConfig = {
             willReadFrequently: true,
             alpha: true,
@@ -44,6 +47,30 @@ export const Screen = (props: ScreenProps) => {
         canvasCtx = canvasRef.current!.getContext('2d', canvasContextConfig)! as CanvasRenderingContext2D;
         lCanvasCtx = props.L.current!.getContext('2d', canvasContextConfig)! as CanvasRenderingContext2D;
         rCanvasCtx = props.R.current!.getContext('2d', canvasContextConfig)! as CanvasRenderingContext2D;
+        const {
+            draw,       // The name of the imported function
+            __getUint8ClampedArray,
+            __newArray,
+            Uint8ClampedArray_ID
+        } = (
+            await instantiateStreaming<typeof MixerEffects>(    // Stream the module...
+                fetch('./assembly/MixerEffects.release.wasm'),  // This is where it lives...
+                {
+                    index: {
+                        readLeft() {
+                            return __newArray(Uint8ClampedArray_ID, lCanvasCtx!.getImageData(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT).data,)
+                        },
+                        readRight() {
+                            return __newArray(Uint8ClampedArray_ID, rCanvasCtx!.getImageData(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT).data)
+                        },
+                        write(response: any) {
+                            canvasCtx!.putImageData(new ImageData(__getUint8ClampedArray(response), VIDEO_WIDTH, VIDEO_HEIGHT), 0, 0);
+                        }
+                    }
+                } as any                                              // Not doing anthing fancy... yet
+            )).exports;
+
+        mergeEffect.current = draw
     }
 
     useTimeout(initializedScreensAndModules, 500);
@@ -68,38 +95,40 @@ export const Screen = (props: ScreenProps) => {
                 slider,
             } = store.getState().screenState;
 
+            mergeEffect?.current?.(slider, 1)
 
-            if (mixEffects.current?.[type].func) {
-                // let dataHolder = lCanvasCtx!.getImageData(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT)
-                //     .data;
-                // const dlLength = dataHolder.length;
 
-                // for (let i = 0; i < dlLength; i++) {
-                //     i8[i] = dataHolder[i];
-                // }
-                // dataHolder = rCanvasCtx!.getImageData(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT)
-                //     .data;
-                // const targetLength = dlLength * 2;
+            // if (mixEffects.current?.[type].func) {
+            //     // let dataHolder = lCanvasCtx!.getImageData(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT)
+            //     //     .data;
+            //     // const dlLength = dataHolder.length;
 
-                // for (let i = dlLength; i < targetLength; i++) {
-                //     i8[i] = dataHolder[i - dlLength];
-                // }
+            //     // for (let i = 0; i < dlLength; i++) {
+            //     //     i8[i] = dataHolder[i];
+            //     // }
+            //     // dataHolder = rCanvasCtx!.getImageData(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT)
+            //     //     .data;
+            //     // const targetLength = dlLength * 2;
 
-                // mutateFunctionRef.current?.()
-                const leftImage = lCanvasCtx!.getImageData(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT).data
+            //     // for (let i = dlLength; i < targetLength; i++) {
+            //     //     i8[i] = dataHolder[i - dlLength];
+            //     // }
 
-                const response = mixEffects.current?.[type].func!(
-                    leftImage,
-                    rCanvasCtx!.getImageData(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT)
-                        .data,
-                    VIDEO_WIDTH,
-                    slider
-                );
-                // for (let i = 0; i < dataHolder.length; i++) {
-                //     dataHolder[i] = i8[i];
-                // }
-                canvasCtx!.putImageData(new ImageData(response, VIDEO_WIDTH, VIDEO_HEIGHT), 0, 0);
-            }
+            //     // mutateFunctionRef.current?.()
+            //     const leftImage = lCanvasCtx!.getImageData(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT).data
+
+            //     const response = mixEffects.current?.[type].func!(
+            //         leftImage,
+            //         rCanvasCtx!.getImageData(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT)
+            //             .data,
+            //         VIDEO_WIDTH,
+            //         slider
+            //     );
+            //     // for (let i = 0; i < dataHolder.length; i++) {
+            //     //     dataHolder[i] = i8[i];
+            //     // }
+            //     canvasCtx!.putImageData(new ImageData(response, VIDEO_WIDTH, VIDEO_HEIGHT), 0, 0);
+            // }
 
         }
     }, FPS_RATE);

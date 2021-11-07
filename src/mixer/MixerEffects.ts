@@ -1,6 +1,6 @@
-import { subtract, loadSubtract } from './subtract';
-import { averageOfTheTwo, wasmAverageOfTheTwo } from './merge';
-import { loadWasmOverlay, overlay } from './str8Overlay';
+import { subtract, } from './subtract';
+import { averageOfTheTwo, } from './merge';
+import { overlay } from './str8Overlay';
 import { fadeOverlay } from './fadeOverlay';
 
 export interface MixEffect {
@@ -23,7 +23,7 @@ export const asyncMixLoader = async (): Promise<{
 }> => {
     return {
         [MixTypes.Merge]: {
-            func: (await wasmAverageOfTheTwo()),
+            func: (averageOfTheTwo),
         },
         [MixTypes.Subtract]: { func: subtract },
         [MixTypes.Str8tOverlay]: { func: overlay },

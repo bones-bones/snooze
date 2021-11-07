@@ -6,7 +6,6 @@
         "."
     ],
     "options": {
-        "importTable": true,
         "exportRuntime": true,
         "importRuntime": true,
         "tsdFile": "../generatedTypes/MixerEffects.d.ts"

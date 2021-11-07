@@ -1,36 +1,35 @@
-
-declare function readLeft(): Uint8Array;
-declare function readRight(): Uint8Array;
-declare function write(array: Uint8Array): void;
-
-
+export declare function readLeft(): Uint8Array;
+export declare function readRight(): Uint8Array;
+export declare function write(array: Uint8Array): void;
 
 export const Uint8ClampedArray_ID = idof<Uint8Array>();
 
-
-export function draw(degree: number, effect: u32): void {
+export function draw(degree: u32, effect: u32): void {
     switch (effect) {
         case 0: {
-            write(overlay(readLeft(), readRight(), 0, degree));
-            return
+            write(straitOverlay(readLeft(), readRight(), degree));
+            return;
         }
         case 1: {
-            write(mergeAverage(readLeft(), readRight(), 0, degree));
-            return
+            write(mergeAverage(readLeft(), readRight(), degree));
+            //  write(readRight());
+            return;
         }
         case 2: {
-            write(subtract(readLeft(), readRight(), 0, degree));
-            return
+            write(subtract(readLeft(), readRight(), degree));
+            return;
         }
     }
 }
 
 
-export function overlay(
+
+
+function straitOverlay(
     leftArray: Uint8Array,
     rightArray: Uint8Array,
-    _width: number,
-    degree: number = 50
+
+    degree: number
 ): Uint8Array {
     const rFactor = degree / 100;
     const lFactor = (100 - degree) / 100;
@@ -82,11 +81,10 @@ export function overlay(
 
 
 
-export function mergeAverage(
+function mergeAverage(
     leftArray: Uint8Array,
     rightArray: Uint8Array,
-    _width: u32,
-    degree: number = 50
+    degree: number
 ): Uint8Array {
 
     const rFactor: f32 = <f32>degree / 100;
@@ -104,11 +102,10 @@ export function mergeAverage(
 }
 
 
-export function subtract(
+function subtract(
     leftArray: Uint8Array,
     rightArray: Uint8Array,
-    _width: number,
-    degree: number = 50
+    degree: number
 ): Uint8Array {
     const rFactor = degree / 100;
     const lFactor = (100 - degree) / 100;
