@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { CustomPicker } from './EffectPickerElements';
-import { EffectTypes } from './effect-functions/EffectTypes';
+import { EffectTypeProperty, EffectTypes, loadEffectTypeProperties } from './effect-functions/EffectTypes';
 import Effect from './EffectClass';
 
 const effectTypes = Object.keys(EffectTypes) as EffectTypes[];
@@ -14,7 +14,20 @@ export const EffectPicker = ({
     const [activeEffect, setActiveEffect] = useState<EffectTypes>(
         effectTypes[0]
     );
-    return (
+    const [loaded, setLoaded] = useState(false)
+    const mixEffects = useRef<{
+        [key in EffectTypes]: EffectTypeProperty;
+    } | null>(null)
+
+
+    useEffect(() => {
+        loadEffectTypeProperties().then(a => {
+            mixEffects.current = a;
+            setLoaded(true)
+        })
+
+    }, [])
+    return (loaded ?
         <>
             {effectTypes.map((entry) => (
                 <button key={entry} onClick={() => setActiveEffect(entry)}>
@@ -27,8 +40,10 @@ export const EffectPicker = ({
                     key={activeEffect}
                     keyType={activeEffect}
                     addFunc={addFunc}
+                    mixEffects={mixEffects.current!}
+
                 />
             )}
-        </>
+        </> : <>loading effects</>
     );
 };

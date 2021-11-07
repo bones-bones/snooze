@@ -1,21 +1,28 @@
-import { GenericGeneratorParms } from './EffectTypes';
+import { VIDEO_HEIGHT, VIDEO_WIDTH } from "../constants";
+import { GenericParms } from "./types";
 
-export function* pixelBlur({ input }: GenericGeneratorParms) {
-    const prev: number[] = new Array(input.length);
-    const dirtyArray: boolean[] = new Array(input.length / 4);
-    for (let i = 0; i < input.length; i++) {
-        prev[i] = input[i];
+let prev: Uint8ClampedArray | undefined;
+
+let dirtyArray: boolean[] | undefined;
+
+export const pixelBlur = ({ array }: GenericParms) => {
+    if (!prev) {
+        console.log('no prev')
+        prev = new Uint8ClampedArray(VIDEO_HEIGHT * VIDEO_WIDTH * 4)
+        for (let i = 0; i < array.length; i++) {
+            prev[i] = array[i];
+        }
+        dirtyArray = new Array(array.length / 4);
+
     }
-    while (true) {
-        input = yield transformForMe(input as number[], prev, dirtyArray);
-    }
+    return transformForMe(array, prev, dirtyArray!)
 }
 
-function transformForMe(
-    array: number[],
-    prev: number[],
+const transformForMe = (
+    array: Uint8ClampedArray,
+    prev: Uint8ClampedArray,
     dirtyArray: boolean[]
-) {
+) => {
     for (let i = 0; i < array.length; i += 4) {
         const mtest = Math.floor(Math.random() * 10);
 

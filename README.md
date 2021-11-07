@@ -1,44 +1,14 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Welcome to snooze, the browserbased video mixer!
+This project started because I think visualing and VJs stuff is cool. I went to enough raves to get an idea of the stuff that gets used as visualizers and I thought, hey, could that be done in the browser. So I started this project. Now it's become a way for me to use emerging web techs, learn new things, and discover the wrong way to do things.
 
-## Available Scripts
 
-In the project directory, you can run:
 
-### `npm start`
+# Usage guide
+I'll keeep a version up at https://skeleton.club/snooze, but it will likely be the older/stabler/staler copy of the code.
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+From the page, drop webms, jpegs, mp4s, pngs, (and more I'm just not sure what else works) onto the left and right decks. The centeral deck is the screen and below it is the fader and several fade effects. Under each deck there is a whole list of buttons to add different effects to that input. Once added the effects can be moved up or down in the order of application.
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+# Dev guide
+This repo uses `yarn`.
+Because this is a pile of hacks, `yarn start` only starts the server, you'll also need to `yarn watch`.
+As this project uses assemblyscript you well need ta `yarn asbuild` at the beginning (and every time you make a change, obviously)

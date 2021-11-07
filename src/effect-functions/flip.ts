@@ -1,4 +1,4 @@
-import { GenericParms } from './EffectTypes';
+import { GenericParms } from './types';
 
 export enum Directions {
     'L to R' = 'L to R',

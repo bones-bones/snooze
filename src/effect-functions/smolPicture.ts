@@ -1,4 +1,4 @@
-import { GenericParms } from './EffectTypes';
+import { GenericParms } from './types';
 
 export function smolPicture({ array, width }: GenericParms) {
     const nWidth = width * 4;
@@ -12,8 +12,8 @@ export function smolPicture({ array, width }: GenericParms) {
 
         array[i] =
             array[
-                (i % halfWidth) * repFactor +
-                    (row % halfHeight) * repFactor * nWidth
+            (i % halfWidth) * repFactor +
+            (row % halfHeight) * repFactor * nWidth
             ];
     }
 }

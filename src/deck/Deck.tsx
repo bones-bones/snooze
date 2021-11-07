@@ -20,6 +20,7 @@ import { LoopControls } from '../loopControls';
 import { DeckMediaSource } from '../deck-media-source/DeckMediaSource';
 import { DeckEffects } from '../deck-effects';
 // import { generate as generateGeoPattern } from 'geopattern';
+let theArray;
 
 export const Deck = ({ canvasRef, deckId }: DeckProps) => {
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -29,10 +30,10 @@ export const Deck = ({ canvasRef, deckId }: DeckProps) => {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        let theArray;
-        canvasCtx = (canvasRef.current as any)?.getContext('2d', {
+        canvasCtx = canvasRef.current?.getContext('2d', {
             willReadFrequently: true,
-        })!;
+        })! as CanvasRenderingContext2D;
+        //canvasCtx!.imageSmoothingEnabled = false;
         requestInterval(() => {
             const {
                 source: { sourceMediaType },
@@ -41,13 +42,12 @@ export const Deck = ({ canvasRef, deckId }: DeckProps) => {
             if (!canvasCtx) {
                 return;
             }
-            const srcCurrent = ((SourceMediaType.Video == sourceMediaType)
+            const srcCurrent = (SourceMediaType.Video == sourceMediaType
                 ? videoRef.current
                 : imageRef.current)!;
 
             // huge performance issue, maybe
             canvasCtx.clearRect(0, 0, srcCurrent!.width, srcCurrent!.height);
-
             // perf issue end
             // const filterArray = [
             //     { turbulence: { frequency: 0.05, numOctaves: 2 } },
@@ -65,38 +65,47 @@ export const Deck = ({ canvasRef, deckId }: DeckProps) => {
                 srcCurrent!.height
             );
 
-            theArray = canvasCtx.getImageData(
-                0,
-                0,
-                canvasRef.current!.width,
-                canvasRef.current!.height
-            );
-            const theArrayData = theArray.data;
-            const dataArray = getSongDataArray();
+            requestAnimationFrame(() => {
+                theArray = canvasCtx!.getImageData(
+                    0,
+                    0,
+                    VIDEO_WIDTH,
+                    VIDEO_HEIGHT
+                ).data;
 
+                const dataArray = getSongDataArray();
 
+                // Future person, at some point you should pass in the getSongDataArray to the generator function
+                for (let i = 0; i < effects.length; i++) {
+                    if (effects[i].active) {
+                        if (effects[i].composedFunctionHolder) {
+                            theArray = effects[i].composedFunctionHolder!(
+                                {
+                                    array: theArray,
+                                    width: VIDEO_WIDTH,
+                                    dataArray,
+                                },
+                                ...(effects[i].parms
+                                    ? Object.values(effects[i].parms)
+                                    : [])
+                            ) as any;
+                        } else if (effects[i].generatorFunctionHolder) {
+                            theArray = (effects[
+                                i
+                            ].generatorFunctionHolder!.next(theArray) as any)
+                                .value;
 
-            // Future elliot, at some point you should pass in the getSongDataArray to the generator function
-            for (let i = 0; i < effects.length; i++) {
-                if (effects[i].active) {
-                    if (effects[i].composedFunctionHolder) {
-                        effects[i].composedFunctionHolder!(
-                            {
-                                array: theArrayData,
-                                width: VIDEO_WIDTH,
-                                dataArray,
-                            },
-                            ...(effects[i].parms
-                                ? Object.values(effects[i].parms)
-                                : [])
-                        );
-                    } else if (effects[i].generatorFunctionHolder) {
-                        effects[i].generatorFunctionHolder!.next(theArrayData);
-                        //This code steers as a generator setTimeout(() => { entry.generatorFunctionHolder!.next({ newValue: 2 }) }, 2000);
+                            //This code steers as a generator setTimeout(() => { entry.generatorFunctionHolder!.next({ newValue: 2 }) }, 2000);
+                        }
                     }
                 }
-            }
-            canvasCtx.putImageData(theArray, 0, 0);
+                canvasCtx!.putImageData(
+                    new ImageData(theArray, VIDEO_WIDTH, VIDEO_HEIGHT),
+                    0,
+                    0
+                );
+                theArray = [];
+            });
         }, FPS_RATE);
     }, []);
     return (
@@ -149,7 +158,11 @@ export const Deck = ({ canvasRef, deckId }: DeckProps) => {
                                                 ? deck0NewSource
                                                 : deck1NewSource;
                                         dispatch(
-                                            sourceFunction({ sourcePath: resp, sourceMediaType: SourceMediaType.Video })
+                                            sourceFunction({
+                                                sourcePath: resp,
+                                                sourceMediaType:
+                                                    SourceMediaType.Video,
+                                            })
                                             // This is probably broken but I'm too lazy to fix it
                                         );
                                     });
@@ -166,7 +179,9 @@ export const Deck = ({ canvasRef, deckId }: DeckProps) => {
                                     sourcePath: URL.createObjectURL(
                                         e.dataTransfer.items[0].getAsFile()!
                                     ),
-                                    sourceMediaType: getSourceMediaTypeForDataTransferType(item.type)
+                                    sourceMediaType: getSourceMediaTypeForDataTransferType(
+                                        item.type
+                                    ),
                                 })
                             );
                         }
@@ -193,17 +208,19 @@ export const Deck = ({ canvasRef, deckId }: DeckProps) => {
                 </button>
                 <LoopControls deckId={deckId} />
                 <br />
-                <button onClick={() => {
-
-                    const sourceFunction =
-                        deckId == 0
-                            ? deck0NewSource
-                            : deck1NewSource;
-                    dispatch(
-                        sourceFunction({ sourceMediaType: SourceMediaType.GeneratedSVG })
-                    );
-                }}>swich to SVG</button>
-
+                <button
+                    onClick={() => {
+                        const sourceFunction =
+                            deckId == 0 ? deck0NewSource : deck1NewSource;
+                        dispatch(
+                            sourceFunction({
+                                sourceMediaType: SourceMediaType.GeneratedSVG,
+                            })
+                        );
+                    }}
+                >
+                    swich to SVG
+                </button>
             </Frame>
             <DeckSFrame>
                 <EffectPicker
@@ -228,21 +245,20 @@ const DeckFrame = styled.div({ height: '100vh' });
 const DeckSFrame = styled.div({ height: '50vh' });
 
 export const getSourceMediaTypeForDataTransferType = (type: string) => {
-    const mameType = type.split('/')[0]
+    const mameType = type.split('/')[0];
     switch (mameType) {
         case 'video': {
-            return SourceMediaType.Video
+            return SourceMediaType.Video;
         }
 
         case 'image': {
-            return SourceMediaType.Image
+            return SourceMediaType.Image;
         }
         default: {
-            return SourceMediaType.Video
+            return SourceMediaType.Video;
         }
     }
-
-}
+};
 
 const DeckCanvas = styled.canvas({
     border: '1px dashed grey',

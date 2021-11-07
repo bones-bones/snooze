@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import styled from '@emotion/styled';
-import { MixTypeProperties } from './mixer/MixerEffects';
+import { asyncMixLoader, MixTypes } from './mixer/MixerEffects';
 import { beginProjection } from './projectionWindow';
 import { FPS, FPS_RATE, VIDEO_HEIGHT, VIDEO_WIDTH } from './constants';
 import { store } from './store';
@@ -8,6 +8,19 @@ import { useRequestInterval } from './useRequestInterval';
 import { useTimeout } from './useTimeout';
 import { Slider } from './Slider';
 import { EffectSelector } from './EffectSelector';
+
+
+import type * as MixerEffects from "../assembly/generatedTypes/MixerEffects"; // pointing at the generated d.ts
+import { instantiateStreaming } from '@assemblyscript/loader';
+
+// const memory = new WebAssembly.Memory({
+//     initial: 24,
+//     maximum: 24,
+//     shared: true
+// } as WebAssembly.MemoryDescriptor & { shared: boolean });
+
+// const i8 = new Uint8ClampedArray(memory.buffer);
+
 //import falter from './svgFilters/test.svg';
 
 interface ScreenProps {
@@ -16,48 +29,74 @@ interface ScreenProps {
     audioRef: React.RefObject<HTMLAudioElement>;
 }
 export const Screen = (props: ScreenProps) => {
+    const mixEffects = useRef<any | null>(null);
+    const mergeEffect = useRef<any | null>(null);
+    asyncMixLoader().then(a => { mixEffects.current = a })
     const canvasRef = useRef<HTMLCanvasElement>(null);
     let lCanvasCtx: CanvasRenderingContext2D | undefined;
     let rCanvasCtx: CanvasRenderingContext2D | undefined;
 
     let canvasCtx: CanvasRenderingContext2D | undefined;
 
-    useTimeout(() => {
-        canvasCtx = canvasRef.current!.getContext('2d', {
+    const initializedScreensAndModules = async () => {
+        const canvasContextConfig = {
             willReadFrequently: true,
-        })! as CanvasRenderingContext2D;
-        lCanvasCtx = props.L.current!.getContext('2d', {
-            willReadFrequently: true,
-        })! as CanvasRenderingContext2D;
-        rCanvasCtx = props.R.current!.getContext('2d', {
-            willReadFrequently: true,
-        })! as CanvasRenderingContext2D;
-    }, 500);
+            alpha: true,
+            //  desynchronized: true unsure if this does anything atm
+        }
+        canvasCtx = canvasRef.current!.getContext('2d', canvasContextConfig)! as CanvasRenderingContext2D;
+        lCanvasCtx = props.L.current!.getContext('2d', canvasContextConfig)! as CanvasRenderingContext2D;
+        rCanvasCtx = props.R.current!.getContext('2d', canvasContextConfig)! as CanvasRenderingContext2D;
+        const {
+            draw,       // The name of the imported function
+            __getUint8ClampedArray,
+            __newArray,
+            Uint8ClampedArray_ID
+        } = (
+            await instantiateStreaming<typeof MixerEffects>(    // Stream the module...
+                fetch('./assembly/MixerEffects.release.wasm'),  // This is where it lives...
+                {
+                    index: {
+                        readLeft() {
+                            return __newArray(Uint8ClampedArray_ID, lCanvasCtx!.getImageData(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT).data,)
+                        },
+                        readRight() {
+                            return __newArray(Uint8ClampedArray_ID, rCanvasCtx!.getImageData(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT).data)
+                        },
+                        write(response: any) {
+                            canvasCtx!.putImageData(new ImageData(__getUint8ClampedArray(response), VIDEO_WIDTH, VIDEO_HEIGHT), 0, 0);
+                        }
+                    }
+                } as any 
+            )).exports;
+
+        mergeEffect.current = draw
+    }
+
+    useTimeout(initializedScreensAndModules, 500);
+    // const mutateFunctionRef = useRef<() => void | null>()
+
+    // useEffect(() => {
+    //     instantiateStreaming<typeof MyModule>(fetch('./assembly/myModule.release.wasm'), { env: { memory } }).then(({ exports: { allOnes, readWasmMemoryAndReturnIndexOne } }) => {
+    //         // arrayData.current = __getArrayView(__pin(allOnes()))
+    //         //console.log(arrayData.current, memory.buffer)
+    //         console.log(readWasmMemoryAndReturnIndexOne());
+    //         mutateFunctionRef.current = allOnes
+    //         allOnes()
+    //         console.log(readWasmMemoryAndReturnIndexOne())
+    //     });
+    // }, [])
 
     // maybe move to requestInterval
-    useRequestInterval(() => {
-        if (lCanvasCtx) {
+    useRequestInterval(function renderScreenContent() {
+        if (lCanvasCtx && rCanvasCtx) {
             const {
                 mixEffect: { type },
                 slider,
             } = store.getState().screenState;
-            const leftImage = lCanvasCtx!.getImageData(
-                0,
-                0,
-                VIDEO_WIDTH,
-                VIDEO_HEIGHT
-            );
 
-            if (MixTypeProperties[type].func) {
-                MixTypeProperties[type].func!(
-                    leftImage.data,
-                    rCanvasCtx!.getImageData(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT)
-                        .data,
-                    VIDEO_WIDTH,
-                    slider
-                );
-            }
-            canvasCtx!.putImageData(leftImage, 0, 0);
+
+            mergeEffect?.current?.(slider, Object.keys(MixTypes).indexOf(type))
         }
     }, FPS_RATE);
 

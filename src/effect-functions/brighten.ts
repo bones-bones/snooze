@@ -1,4 +1,4 @@
-import { GenericParms } from './EffectTypes';
+import { GenericParms } from './types';
 
 export function brightenEffect(
     { array }: GenericParms,
@@ -12,8 +12,8 @@ export function brightenEffect(
 
         const sumVal = Math.sqrt(
             (r - colorCenterPoint) * (r - colorCenterPoint) +
-                (g - colorCenterPoint) * (g - colorCenterPoint) +
-                (b - colorCenterPoint) * (b - colorCenterPoint)
+            (g - colorCenterPoint) * (g - colorCenterPoint) +
+            (b - colorCenterPoint) * (b - colorCenterPoint)
         );
         if (sumVal > 15) {
             array[y] = array[y] + ((256 - array[y]) * deg) / 100;

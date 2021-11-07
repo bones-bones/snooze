@@ -9,11 +9,11 @@ export function beginProjection() {
                 'Projector'
             ); //, 'resizable');
 
-            bc.onmessage = function (ev) {
+            bc.onmessage = function async(ev) {
                 console.log(ev);
 
-                test.setRemoteDescription(JSON.parse(ev.data));
-                resolve(test);
+                test.setRemoteDescription(JSON.parse(ev.data)).then(() => { resolve(test); });
+
             }; /* receive */
         });
     });

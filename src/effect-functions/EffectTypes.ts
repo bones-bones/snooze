@@ -2,10 +2,10 @@ import { pixelateEffect } from './pixelate';
 import { rotate } from './rotate';
 import { flashWithInput, Tint } from './flashWithInput';
 import FlipEffect, { Directions } from './flip';
-import NegaEffect from './nega';
+import { negaEffect } from './nega';
 import LoFiTVEffect from './lofitv';
 import XtoYEffect from './xtoy';
-import HardRGBEffect from './hardRGB';
+import { wasmHardRGB } from './hardRGB';
 import WaveEffect from './wave';
 import { slideEffect } from './slide';
 import { RGBSlideEffect, Color as SlideColors } from './RGBSlide';
@@ -23,14 +23,14 @@ import { closeNuff } from './closeNuff';
 import { brightStar } from './brightStar';
 import { drip } from './drip';
 import { shiver } from './shiver';
-import { getSongDataArray } from '../InputSource';
 import { lineTranspose } from './lineTranspose';
 import { smolPicture } from './smolPicture';
 import { negaRotate } from './negaRotate';
 import { pulseWithSound } from './pulseWithSound';
 import { hardLine } from './hardLine';
-import { cartoon } from './cartoon';
+import { loadWasmCartoon } from './cartoon';
 import { bars } from './bars';
+import { GenericParms } from './types';
 
 // To add an effect, add it in EffectTypes, EffectTypeProperty, and add a function that transforms an array
 export enum EffectTypes {
@@ -68,9 +68,26 @@ export enum EffectTypes {
     WhiteToRainbow = 'WhiteToRainbow',
 }
 
-export const EffectTypeProperties: {
+let loadedEffects: {
     [key in EffectTypes]: EffectTypeProperty;
-} = {
+};
+export const loadEffectTypeProperties = async (): Promise<{
+    [key in EffectTypes]: EffectTypeProperty;
+}> => {
+    if (!loadedEffects) {
+        loadedEffects = await loadEffectFilesIntoObject();
+    }
+
+    return loadedEffects
+
+}
+
+
+
+
+const loadEffectFilesIntoObject = async (): Promise<{
+    [key in EffectTypes]: EffectTypeProperty;
+}> => ({
     [EffectTypes.NegaRotate]: {
         generatorFunction: negaRotate,
         parms: [
@@ -101,7 +118,7 @@ export const EffectTypeProperties: {
     },
     [EffectTypes.WhiteToRainbow]: { generatorFunction: whiteToRainbow },
     [EffectTypes.Nega]: {
-        func: NegaEffect,
+        func: negaEffect,
     },
     [EffectTypes.LoFiTV]: {
         func: LoFiTVEffect,
@@ -138,7 +155,7 @@ export const EffectTypeProperties: {
         ],
     },
     [EffectTypes.HardRGB]: {
-        func: HardRGBEffect,
+        func: await wasmHardRGB(),
     },
     [EffectTypes.Rotate]: {
         func: rotate,
@@ -193,7 +210,7 @@ export const EffectTypeProperties: {
             },
         ],
     },
-    [EffectTypes.PixelBlur]: { generatorFunction: pixelBlur },
+    [EffectTypes.PixelBlur]: { func: pixelBlur },
     [EffectTypes.RotateGenerator]: {
         generatorFunction: rotateGenerator,
         parms: [{ type: 'number', label: 'speed of rotation' }],
@@ -224,9 +241,12 @@ export const EffectTypeProperties: {
     [EffectTypes.LineTranspose]: { generatorFunction: lineTranspose },
     [EffectTypes.TileThePicture]: { func: smolPicture },
     [EffectTypes.PulseWithSound]: { func: pulseWithSound },
-    [EffectTypes.Cartoon]: { func: cartoon },
+    [EffectTypes.Cartoon]: { func: (await loadWasmCartoon()) },
     [EffectTypes.Bars]: { func: bars },
-};
+})
+
+
+
 
 export interface EffectTypeProperty {
     func?: (array: GenericParms, ...args: any[]) => Uint8ClampedArray | void;
@@ -242,25 +262,8 @@ export interface EffectTypeProperty {
     }[];
 }
 
-export interface GenericParms {
-    array: Uint8ClampedArray;
-    width: number;
-    /**
-     * Returns the greatest integer less than or equal to its numeric argument.
-     * [255, 255, 216, 132, 104, 97, 103, 121, 119, 127, 136, 135, 115, 117, 90, 51, 0, 0, 0, 0, 0, 0, 0, 0]
-     */
-    dataArray?: Uint8Array;
-}
 
 export interface GenericGeneratorParms
     extends Pick<GenericParms, 'width' | 'dataArray'> {
     input: number[] | any; // Okay so this any is for the steerable generator bit
 }
-
-export const metaFunk = (
-    theFunction: (args: GenericParms, inputAbleNumber: number) => number[],
-    indexForDataArray: number
-): ((test: GenericParms) => number[]) => (test: GenericParms) => {
-    const data = getSongDataArray();
-    return theFunction(test, (data[indexForDataArray || 0] || 0) - 240);
-};

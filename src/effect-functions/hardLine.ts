@@ -1,5 +1,5 @@
 import { VIDEO_WIDTH } from '../constants';
-import { GenericParms } from './EffectTypes';
+import { GenericParms } from './types';
 import { getColorDistance } from './helperFunctions/colorDistance';
 
 const tArray = new Array(VIDEO_WIDTH * 4);

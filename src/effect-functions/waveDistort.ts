@@ -1,4 +1,4 @@
-import { GenericParms } from './EffectTypes';
+import { GenericParms } from './types';
 
 export function waveDistort({ array, width }: GenericParms) {
     const newWidth = 4 * width;

@@ -1,4 +1,4 @@
-import { GenericParms } from './EffectTypes';
+import { GenericParms } from './types';
 
 export default function blackAndWhite({ array }: GenericParms) {
     for (let y = 0; y < array.length; y += 4) {
