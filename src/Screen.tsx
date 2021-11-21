@@ -9,8 +9,7 @@ import { useTimeout } from './useTimeout';
 import { Slider } from './Slider';
 import { EffectSelector } from './EffectSelector';
 
-
-import type * as MixerEffects from "../assembly/generatedTypes/MixerEffects"; // pointing at the generated d.ts
+import type * as MixerEffects from '../assembly/generatedTypes/MixerEffects'; // pointing at the generated d.ts
 import { instantiateStreaming } from '@assemblyscript/loader';
 
 // const memory = new WebAssembly.Memory({
@@ -31,7 +30,9 @@ interface ScreenProps {
 export const Screen = (props: ScreenProps) => {
     const mixEffects = useRef<any | null>(null);
     const mergeEffect = useRef<any | null>(null);
-    asyncMixLoader().then(a => { mixEffects.current = a })
+    asyncMixLoader().then((a) => {
+        mixEffects.current = a;
+    });
     const canvasRef = useRef<HTMLCanvasElement>(null);
     let lCanvasCtx: CanvasRenderingContext2D | undefined;
     let rCanvasCtx: CanvasRenderingContext2D | undefined;
@@ -41,37 +42,71 @@ export const Screen = (props: ScreenProps) => {
     const initializedScreensAndModules = async () => {
         const canvasContextConfig = {
             willReadFrequently: true,
-            alpha: true,
+            alpha: false,
             //  desynchronized: true unsure if this does anything atm
-        }
-        canvasCtx = canvasRef.current!.getContext('2d', canvasContextConfig)! as CanvasRenderingContext2D;
-        lCanvasCtx = props.L.current!.getContext('2d', canvasContextConfig)! as CanvasRenderingContext2D;
-        rCanvasCtx = props.R.current!.getContext('2d', canvasContextConfig)! as CanvasRenderingContext2D;
+        };
+        canvasCtx = canvasRef.current!.getContext(
+            '2d',
+            canvasContextConfig
+        )! as CanvasRenderingContext2D;
+        lCanvasCtx = props.L.current!.getContext(
+            '2d',
+            canvasContextConfig
+        )! as CanvasRenderingContext2D;
+        rCanvasCtx = props.R.current!.getContext(
+            '2d',
+            canvasContextConfig
+        )! as CanvasRenderingContext2D;
         const {
-            draw,       // The name of the imported function
+            draw, // The name of the imported function
             __getUint8ClampedArray,
             __newArray,
-            Uint8ClampedArray_ID
+            Uint8ClampedArray_ID,
         } = (
-            await instantiateStreaming<typeof MixerEffects>(    // Stream the module...
-                fetch('./assembly/MixerEffects.release.wasm'),  // This is where it lives...
+            await instantiateStreaming<typeof MixerEffects>( // Stream the module...
+                fetch('./assembly/MixerEffects.release.wasm'), // This is where it lives...
                 {
                     index: {
                         readLeft() {
-                            return __newArray(Uint8ClampedArray_ID, lCanvasCtx!.getImageData(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT).data,)
+                            return __newArray(
+                                Uint8ClampedArray_ID,
+                                lCanvasCtx!.getImageData(
+                                    0,
+                                    0,
+                                    VIDEO_WIDTH,
+                                    VIDEO_HEIGHT
+                                ).data
+                            );
                         },
                         readRight() {
-                            return __newArray(Uint8ClampedArray_ID, rCanvasCtx!.getImageData(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT).data)
+                            return __newArray(
+                                Uint8ClampedArray_ID,
+                                rCanvasCtx!.getImageData(
+                                    0,
+                                    0,
+                                    VIDEO_WIDTH,
+                                    VIDEO_HEIGHT
+                                ).data
+                            );
                         },
                         write(response: any) {
-                            canvasCtx!.putImageData(new ImageData(__getUint8ClampedArray(response), VIDEO_WIDTH, VIDEO_HEIGHT), 0, 0);
-                        }
-                    }
-                } as any 
-            )).exports;
+                            canvasCtx!.putImageData(
+                                new ImageData(
+                                    __getUint8ClampedArray(response),
+                                    VIDEO_WIDTH,
+                                    VIDEO_HEIGHT
+                                ),
+                                0,
+                                0
+                            );
+                        },
+                    },
+                } as any
+            )
+        ).exports;
 
-        mergeEffect.current = draw
-    }
+        mergeEffect.current = draw;
+    };
 
     useTimeout(initializedScreensAndModules, 500);
     // const mutateFunctionRef = useRef<() => void | null>()
@@ -95,8 +130,7 @@ export const Screen = (props: ScreenProps) => {
                 slider,
             } = store.getState().screenState;
 
-
-            mergeEffect?.current?.(slider, Object.keys(MixTypes).indexOf(type))
+            mergeEffect?.current?.(slider, Object.keys(MixTypes).indexOf(type));
         }
     }, FPS_RATE);
 

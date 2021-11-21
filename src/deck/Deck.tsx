@@ -32,6 +32,7 @@ export const Deck = ({ canvasRef, deckId }: DeckProps) => {
     useEffect(() => {
         canvasCtx = canvasRef.current?.getContext('2d', {
             willReadFrequently: true,
+            alpha: false,
         })! as CanvasRenderingContext2D;
         //canvasCtx!.imageSmoothingEnabled = false;
         requestInterval(() => {

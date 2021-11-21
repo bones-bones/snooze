@@ -31,6 +31,7 @@ import { hardLine } from './hardLine';
 import { loadWasmCartoon } from './cartoon';
 import { bars } from './bars';
 import { GenericParms } from './types';
+import { sideStripes } from './sideStripes';
 
 // To add an effect, add it in EffectTypes, EffectTypeProperty, and add a function that transforms an array
 export enum EffectTypes {
@@ -58,6 +59,7 @@ export enum EffectTypes {
     RGBSlide = 'RGBSlide',
     Rotate = 'Rotate',
     RotateGenerator = 'RotateGenerator',
+    SlideStripes = 'SlideStripes',
     Shiver = 'Shiver',
     Slide = 'Slide',
     TileThePicture = 'TileThePicture',
@@ -71,23 +73,23 @@ export enum EffectTypes {
 let loadedEffects: {
     [key in EffectTypes]: EffectTypeProperty;
 };
-export const loadEffectTypeProperties = async (): Promise<{
-    [key in EffectTypes]: EffectTypeProperty;
-}> => {
+export const loadEffectTypeProperties = async (): Promise<
+    {
+        [key in EffectTypes]: EffectTypeProperty;
+    }
+> => {
     if (!loadedEffects) {
         loadedEffects = await loadEffectFilesIntoObject();
     }
 
-    return loadedEffects
+    return loadedEffects;
+};
 
-}
-
-
-
-
-const loadEffectFilesIntoObject = async (): Promise<{
-    [key in EffectTypes]: EffectTypeProperty;
-}> => ({
+const loadEffectFilesIntoObject = async (): Promise<
+    {
+        [key in EffectTypes]: EffectTypeProperty;
+    }
+> => ({
     [EffectTypes.NegaRotate]: {
         generatorFunction: negaRotate,
         parms: [
@@ -241,12 +243,10 @@ const loadEffectFilesIntoObject = async (): Promise<{
     [EffectTypes.LineTranspose]: { generatorFunction: lineTranspose },
     [EffectTypes.TileThePicture]: { func: smolPicture },
     [EffectTypes.PulseWithSound]: { func: pulseWithSound },
-    [EffectTypes.Cartoon]: { func: (await loadWasmCartoon()) },
+    [EffectTypes.Cartoon]: { func: await loadWasmCartoon() },
     [EffectTypes.Bars]: { func: bars },
-})
-
-
-
+    [EffectTypes.SlideStripes]: { func: sideStripes },
+});
 
 export interface EffectTypeProperty {
     func?: (array: GenericParms, ...args: any[]) => Uint8ClampedArray | void;
@@ -261,7 +261,6 @@ export interface EffectTypeProperty {
         defaultValue?: any;
     }[];
 }
-
 
 export interface GenericGeneratorParms
     extends Pick<GenericParms, 'width' | 'dataArray'> {

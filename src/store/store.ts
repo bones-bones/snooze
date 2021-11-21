@@ -10,7 +10,7 @@ import { MixEffect, MixTypes } from '../mixer/MixerEffects';
 import cubes from '../webms/cubes.webm';
 import Effect from '../EffectClass';
 import { EffectTypes } from '../effect-functions/EffectTypes';
-import { bars } from '../effect-functions/bars';
+import { sideStripes } from '../effect-functions/sideStripes';
 import { LoopBehavior } from '../deck/enums';
 
 interface ScreenState {
@@ -49,7 +49,7 @@ const screenSlice = createSlice({
 export enum SourceMediaType {
     Video = 'Video',
     Image = 'Image',
-    GeneratedSVG = 'GeneratedSVG'
+    GeneratedSVG = 'GeneratedSVG',
 }
 
 const generateDeckSlice = ({
@@ -64,10 +64,10 @@ const generateDeckSlice = ({
         effects: [
             {
                 label: 'bar',
-                type: EffectTypes.Bars,
+                type: EffectTypes.SlideStripes,
                 parms: [],
                 active: true,
-                composedFunctionHolder: bars,
+                composedFunctionHolder: sideStripes,
             },
         ],
         loopBehavior: LoopBehavior.Loop,
@@ -111,8 +111,14 @@ const generateDeckSlice = ({
     });
 };
 
-const deck0Slice = generateDeckSlice({ name: 'deck0', source: { sourceMediaType: SourceMediaType.GeneratedSVG } });
-const deck1Slice = generateDeckSlice({ name: 'deck1', source: { sourcePath: cubes, sourceMediaType: SourceMediaType.Video } });
+const deck0Slice = generateDeckSlice({
+    name: 'deck0',
+    source: { sourceMediaType: SourceMediaType.GeneratedSVG },
+});
+const deck1Slice = generateDeckSlice({
+    name: 'deck1',
+    source: { sourcePath: cubes, sourceMediaType: SourceMediaType.Video },
+});
 
 export const {
     newSource: deck0NewSource,
@@ -121,7 +127,6 @@ export const {
     orderEffect: deck0OrderEffect,
     removeEffect: deck0RemoveEffect,
     toggleEffectActive: deck0ToggleEffectActive,
-
 } = deck0Slice.actions;
 export const {
     newSource: deck1NewSource,
