@@ -32,7 +32,7 @@ export const Deck = ({ canvasRef, deckId }: DeckProps) => {
     useEffect(() => {
         canvasCtx = canvasRef.current?.getContext('2d', {
             willReadFrequently: true,
-            alpha: false,
+            alpha: true, // The background will be white otherwise
         })! as CanvasRenderingContext2D;
         //canvasCtx!.imageSmoothingEnabled = false;
         requestInterval(() => {
@@ -66,47 +66,46 @@ export const Deck = ({ canvasRef, deckId }: DeckProps) => {
                 srcCurrent!.height
             );
 
-            requestAnimationFrame(() => {
-                theArray = canvasCtx!.getImageData(
-                    0,
-                    0,
-                    VIDEO_WIDTH,
-                    VIDEO_HEIGHT
-                ).data;
+            /*
+             * Okay this is weird. I swear that chrome just updated to support willReadFrequently. And in doing so, broke the hack i had here
+             * Seems like there is in extra frame shoved in after drawImage. 96.0.4664.55. On the plus side, getImageData takes like zero time now
+             */
 
-                const dataArray = getSongDataArray();
+            // requestAnimationFrame(() => {
+            theArray = canvasCtx!.getImageData(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT)
+                .data;
 
-                // Future person, at some point you should pass in the getSongDataArray to the generator function
-                for (let i = 0; i < effects.length; i++) {
-                    if (effects[i].active) {
-                        if (effects[i].composedFunctionHolder) {
-                            theArray = effects[i].composedFunctionHolder!(
-                                {
-                                    array: theArray,
-                                    width: VIDEO_WIDTH,
-                                    dataArray,
-                                },
-                                ...(effects[i].parms
-                                    ? Object.values(effects[i].parms)
-                                    : [])
-                            ) as any;
-                        } else if (effects[i].generatorFunctionHolder) {
-                            theArray = (effects[
-                                i
-                            ].generatorFunctionHolder!.next(theArray) as any)
-                                .value;
+            const dataArray = getSongDataArray();
 
-                            //This code steers as a generator setTimeout(() => { entry.generatorFunctionHolder!.next({ newValue: 2 }) }, 2000);
-                        }
+            // Future person, at some point you should pass in the getSongDataArray to the generator function
+            for (let i = 0; i < effects.length; i++) {
+                if (effects[i].active) {
+                    if (effects[i].composedFunctionHolder) {
+                        theArray = effects[i].composedFunctionHolder!(
+                            {
+                                array: theArray,
+                                width: VIDEO_WIDTH,
+                                dataArray,
+                            },
+                            ...(effects[i].parms
+                                ? Object.values(effects[i].parms)
+                                : [])
+                        ) as any;
+                    } else if (effects[i].generatorFunctionHolder) {
+                        theArray = (effects[i].generatorFunctionHolder!.next(
+                            theArray
+                        ) as any).value;
+                        //This code steers as a generator setTimeout(() => { entry.generatorFunctionHolder!.next({ newValue: 2 }) }, 2000);
                     }
                 }
-                canvasCtx!.putImageData(
-                    new ImageData(theArray, VIDEO_WIDTH, VIDEO_HEIGHT),
-                    0,
-                    0
-                );
-                theArray = [];
-           });
+            }
+            canvasCtx!.putImageData(
+                new ImageData(theArray, VIDEO_WIDTH, VIDEO_HEIGHT),
+                0,
+                0
+            );
+            theArray = [];
+            // });
         }, FPS_RATE);
     }, []);
     return (
