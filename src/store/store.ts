@@ -10,7 +10,7 @@ import { MixEffect, MixTypes } from '../mixer/MixerEffects';
 import cubes from '../webms/cubes.webm';
 import Effect from '../EffectClass';
 import { EffectTypes } from '../effect-functions/EffectTypes';
-import { sideStripes } from '../effect-functions/sideStripes';
+import { slideBright } from '../effect-functions/slideBright';
 import { LoopBehavior } from '../deck/enums';
 
 interface ScreenState {
@@ -63,11 +63,11 @@ const generateDeckSlice = ({
         source,
         effects: [
             {
-                label: 'bar',
-                type: EffectTypes.SlideStripes,
+                label: 'slideBright',
+                type: EffectTypes.SlideBright,
                 parms: [],
                 active: true,
-                composedFunctionHolder: sideStripes,
+                composedFunctionHolder: slideBright,
             },
         ],
         loopBehavior: LoopBehavior.Loop,

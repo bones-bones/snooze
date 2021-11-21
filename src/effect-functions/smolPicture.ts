@@ -16,6 +16,7 @@ export function smolPicture({ array, width }: GenericParms) {
             (row % halfHeight) * repFactor * nWidth
             ];
     }
+    return array;
 }
 
 // Glitch tiny tiny tny tiny resameple

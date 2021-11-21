@@ -32,6 +32,7 @@ import { loadWasmCartoon } from './cartoon';
 import { bars } from './bars';
 import { GenericParms } from './types';
 import { sideStripes } from './sideStripes';
+import { slideBright } from './slideBright';
 
 // To add an effect, add it in EffectTypes, EffectTypeProperty, and add a function that transforms an array
 export enum EffectTypes {
@@ -62,6 +63,7 @@ export enum EffectTypes {
     SlideStripes = 'SlideStripes',
     Shiver = 'Shiver',
     Slide = 'Slide',
+    SlideBright = 'SlideBright',
     TileThePicture = 'TileThePicture',
     ToAlpha = 'ToAlpha',
     Wave = 'Wave',
@@ -246,6 +248,7 @@ const loadEffectFilesIntoObject = async (): Promise<
     [EffectTypes.Cartoon]: { func: await loadWasmCartoon() },
     [EffectTypes.Bars]: { func: bars },
     [EffectTypes.SlideStripes]: { func: sideStripes },
+    [EffectTypes.SlideBright]: { func: slideBright },
 });
 
 export interface EffectTypeProperty {

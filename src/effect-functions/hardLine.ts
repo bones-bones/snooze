@@ -45,4 +45,5 @@ export function hardLine(
             tArray[i + 3] = undefined;
         }
     }
+    return inputArray
 }

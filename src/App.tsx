@@ -1,7 +1,7 @@
 import React from 'react';
 // import Pane from './Pane';
 import { Deck } from './deck';
-import { Screen } from './Screen';
+import { Screen } from './screen/Screen';
 import { MainPane } from './MainPane';
 
 import { AudioPlayer } from './AudioPlayer';

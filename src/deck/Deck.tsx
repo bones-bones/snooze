@@ -106,7 +106,7 @@ export const Deck = ({ canvasRef, deckId }: DeckProps) => {
                     0
                 );
                 theArray = [];
-            });
+           });
         }, FPS_RATE);
     }, []);
     return (

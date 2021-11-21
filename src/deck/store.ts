@@ -2,7 +2,7 @@ import { DeckState, Source } from '../deck';
 
 import Effect from '../EffectClass';
 import { EffectTypes } from '../effect-functions/EffectTypes';
-import { bars } from '../effect-functions/bars';
+import { slideBright } from '../effect-functions/slideBright';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { LoopBehavior } from './enums';
 import { SourceMediaType } from '../store';
@@ -15,18 +15,20 @@ export const generateDeckSlice = ({
     source: string;
 }) => {
     const initialDeckState: DeckState = {
-        source: { sourcePath: source, sourceMediaType: SourceMediaType.GeneratedSVG },
+        source: {
+            sourcePath: source,
+            sourceMediaType: SourceMediaType.GeneratedSVG,
+        },
         effects: [
             {
-                label: 'bar',
-                type: EffectTypes.Bars,
+                label: 'slideBright',
+                type: EffectTypes.SlideBright,
                 parms: [],
                 active: true,
-                composedFunctionHolder: bars,
+                composedFunctionHolder: slideBright,
             },
         ],
         loopBehavior: LoopBehavior.Loop,
-
     };
 
     return createSlice({

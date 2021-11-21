@@ -31,4 +31,5 @@ export function pixelateEffect(
             }
         }
     }
+    return array;
 }
